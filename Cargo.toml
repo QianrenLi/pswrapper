@@ -1,0 +1,21 @@
+[package]
+name = "pswrapper"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "ps_wrapper"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dependencies.pyo3]
+version = "0.15"
+
+[features]
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]
