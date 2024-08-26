@@ -1,5 +1,6 @@
 mod socket;
 
+use libc::MSG_TRYHARD;
 use pyo3::prelude::*;
 use crate::socket::create_udp_socket;
 use std::net::UdpSocket;
@@ -55,6 +56,9 @@ impl PsWrapper {
                     data.push(value);
                 }
                 Ok(data.to_object(py))
+            } else if msg_type.name()? == "Float32" {
+                let value = f32::from_be_bytes(data_bytes[0..4].try_into().unwrap());
+                Ok(value.to_object(py))
             } else {
                 Err(pyo3::exceptions::PyValueError::new_err(format!(
                     "Unhandled msg_type {} with data: {:?}",
@@ -77,6 +81,9 @@ impl PsWrapper {
         } else if msg_type.name()? == "Int8" {
             let value: i8 = data.extract(py)?;
             Ok(vec![value.to_be_bytes()[0]])
+        } else if msg_type.name()? == "Float32" {
+            let value: f32 = data.extract(py)?;
+            Ok(value.to_be_bytes().to_vec())
         } else {
             Err(pyo3::exceptions::PyValueError::new_err(format!(
                 "Unhandled msg_type {} with data: {:?}",
