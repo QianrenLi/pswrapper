@@ -29,7 +29,7 @@ impl PsWrapper {
             sock.set_nonblocking(true).unwrap();
         }
         else {
-            sock.set_nonblocking(false).unwrap();
+            sock.set_nonblocking(true).unwrap();
         }
         
         Ok(PsWrapper {
@@ -99,7 +99,11 @@ impl PsWrapper {
     pub fn listen(&self, py: Python) -> PyResult<PyObject> {
         let mut buf = [0; 100];
         loop {
-            if let Ok((len, _src_addr)) = self.sock.recv_from(&mut buf) {
+            let result = py.allow_threads(|| self.sock.recv_from(&mut buf));
+            if let Ok((len, _src_addr)) = result {
+                if len == 0 {
+                    continue;
+                }
                 return self.to_message(py, &buf[..len]);
             }
         }
