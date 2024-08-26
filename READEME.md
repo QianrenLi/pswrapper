@@ -2,3 +2,4 @@
 ```bash
 python3 -m venv .env
 ```
+2. Install maturin 

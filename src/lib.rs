@@ -99,6 +99,7 @@ impl PsWrapper {
                 }
                 Err(_) => {
                     // Non-blocking mode, so we just continue
+                    std::thread::sleep(std::time::Duration::from_nanos(10_000) );
                     continue;
                 }
             }
