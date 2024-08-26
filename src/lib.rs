@@ -59,6 +59,9 @@ impl PsWrapper {
             } else if msg_type.name()? == "Float32" {
                 let value = f32::from_be_bytes(data_bytes[0..4].try_into().unwrap());
                 Ok(value.to_object(py))
+            } else if msg_type.name()? == "Float64" {
+                let value = f64::from_be_bytes(data_bytes[0..8].try_into().unwrap());
+                Ok(value.to_object(py))
             } else {
                 Err(pyo3::exceptions::PyValueError::new_err(format!(
                     "Unhandled msg_type {} with data: {:?}",
@@ -83,6 +86,9 @@ impl PsWrapper {
             Ok(vec![value.to_be_bytes()[0]])
         } else if msg_type.name()? == "Float32" {
             let value: f32 = data.extract(py)?;
+            Ok(value.to_be_bytes().to_vec())
+        } else if msg_type.name()? == "Float64" {
+            let value: f64 = data.extract(py)?;
             Ok(value.to_be_bytes().to_vec())
         } else {
             Err(pyo3::exceptions::PyValueError::new_err(format!(
