@@ -24,7 +24,13 @@ impl PsWrapper {
         } else {
             UdpSocket::bind(addr.clone()).unwrap()
         };
-        sock.set_nonblocking(true).unwrap();
+        
+        if is_sender {
+            sock.set_nonblocking(true).unwrap();
+        }
+        else {
+            sock.set_nonblocking(false).unwrap();
+        }
         
         Ok(PsWrapper {
             target_addr: addr,
@@ -93,15 +99,8 @@ impl PsWrapper {
     pub fn listen(&self, py: Python) -> PyResult<PyObject> {
         let mut buf = [0; 100];
         loop {
-            match self.sock.recv_from(&mut buf) {
-                Ok((size, _)) => {
-                    return self.to_message(py, &buf[..size]);
-                }
-                Err(_) => {
-                    // Non-blocking mode, so we just continue
-                    std::thread::sleep(std::time::Duration::from_nanos(10_000) );
-                    continue;
-                }
+            if let Ok((len, _src_addr)) = self.sock.recv_from(&mut buf) {
+                return self.to_message(py, &buf[..len]);
             }
         }
     }
